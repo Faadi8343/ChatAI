@@ -95,6 +95,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^5.56.2
     version: 5.90.6(react@19.2.0)
+  bytez.js:
+    specifier: ^1.1.18
+    version: 1.1.18
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -2993,6 +2996,13 @@ packages:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
     dev: true
 
+  /bytez.js@1.1.18:
+    resolution: {integrity: sha512-LqsjFxNBDq252hSU2FVIGvxZUpK+q9SuNmdQiOkNEuYv8FldgbTzD/fcEGD0+QCLQvD7cWk0b+HobG8G5U2s7Q==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      undici: 7.16.0
+    dev: false
+
   /callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
@@ -4623,6 +4633,11 @@ packages:
 
   /undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+  /undici@7.16.0:
+    resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
+    engines: {node: '>=20.18.1'}
+    dev: false
 
   /update-browserslist-db@1.1.4(browserslist@4.27.0):
     resolution: {integrity: sha512-q0SPT4xyU84saUX+tomz1WLkxUbuaJnR1xWt17M7fJtEJigJeWUNGUqrauFXsHnqev9y9JTRGwk13tFBuKby4A==}
