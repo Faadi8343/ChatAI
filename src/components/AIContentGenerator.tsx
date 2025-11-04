@@ -46,20 +46,61 @@ const AIContentGenerator = () => {
   const [topic, setTopic] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [streamingContent, setStreamingContent] = useState<{ title: string; content: string } | null>(null);
   const [suggestions] = useState(getContentSuggestions('blog'));
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
-    
+
     setIsGenerating(true);
+    setStreamingContent({ title: '', content: '' });
+    setGeneratedContent(null);
+
     try {
-      const content = await generateContent({
+      const generator = generateContent({
         ...request as ContentRequest,
         topic
       });
-      setGeneratedContent(content);
+
+      let title = '';
+      let content = '';
+
+      for await (const chunk of generator) {
+        if (chunk.type === 'title') {
+          title = chunk.data;
+          setStreamingContent(prev => prev ? { ...prev, title } : { title, content: '' });
+        } else if (chunk.type === 'content') {
+          content += (content ? ' ' : '') + chunk.data;
+          setStreamingContent(prev => prev ? { ...prev, content } : { title, content });
+        }
+      }
+
+      // After streaming, set the final generated content
+      const finalContent: GeneratedContent = {
+        id: Math.random().toString(36).substr(2, 9),
+        title: title || `${topic} - ${request.type}`,
+        content,
+        type: request.type as string,
+        createdAt: new Date(),
+        wordCount: content.split(/\s+/).length
+      };
+      setGeneratedContent(finalContent);
+      setStreamingContent(null);
     } catch (error) {
       console.error('Generation failed:', error);
+      // On error, try to show partial content if available
+      if (streamingContent && (streamingContent.title || streamingContent.content)) {
+        const finalContent: GeneratedContent = {
+          id: Math.random().toString(36).substr(2, 9),
+          title: streamingContent.title || `${topic} - ${request.type}`,
+          content: streamingContent.content,
+          type: request.type as string,
+          createdAt: new Date(),
+          wordCount: streamingContent.content.split(/\s+/).length
+        };
+        setGeneratedContent(finalContent);
+      }
+      setStreamingContent(null);
     } finally {
       setIsGenerating(false);
     }
@@ -261,7 +302,38 @@ const AIContentGenerator = () => {
               </CardHeader>
               <CardContent>
                 <AnimatePresence mode="wait">
-                  {isGenerating ? (
+                  {isGenerating && streamingContent ? (
+                    <motion.div
+                      key="streaming"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="space-y-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-white">{streamingContent.title || 'Generating title...'}</h3>
+                        <div className="flex items-center gap-2 text-sm text-white/60">
+                          <Clock className="w-4 h-4" />
+                          {streamingContent.content.split(' ').length} words
+                        </div>
+                      </div>
+
+                      <Textarea
+                        value={streamingContent.content}
+                        readOnly
+                        className="min-h-[300px] bg-white/5 border-white/20 text-white resize-none"
+                      />
+
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="border-white/30 text-white/70">
+                          {request.type}
+                        </Badge>
+                        <Badge variant="outline" className="border-white/30 text-white/70">
+                          Streaming...
+                        </Badge>
+                      </div>
+                    </motion.div>
+                  ) : isGenerating ? (
                     <motion.div
                       key="loading"
                       initial={{ opacity: 0 }}
